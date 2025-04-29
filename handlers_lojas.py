@@ -34,7 +34,7 @@ async def listar_lojas(update: Update, context: ContextTypes.DEFAULT_TYPE):
         texto = f"🏬 Lojas na {regiao.replace('_', ' ').title()}:\n\n"
         for loja in lojas[regiao]:
             texto += f"• {loja['nome']}\n  📍 {loja['endereco']}\n  📸 Instagram: {loja['instagram']}\n\n"
-         botoes = [
+        botoes = [
             [InlineKeyboardButton("🔄 Ver outras regiões", callback_data="menu_lojas")],
             [InlineKeyboardButton("🔙 Voltar ao Menu Principal", callback_data="voltar_menu")],
             [InlineKeyboardButton("✅ Finalizar", callback_data="finalizar")]
