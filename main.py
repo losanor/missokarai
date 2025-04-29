@@ -15,6 +15,8 @@ APP_URL = os.getenv("APP_URL")
 app_flask = Flask(__name__)
 application = None
 
+# --------------------- HANDLERS TELEGRAM --------------------
+
 async def menu_principal(update: Update, context):
     botoes = [
         [InlineKeyboardButton("📍 Localizar Lojas", callback_data="menu_lojas")],
@@ -35,6 +37,8 @@ async def router(update, context):
     elif data.startswith("categoria_"):
         await listar_receitas(update, context)
 
+# --------------------- FLASK WEBHOOK --------------------
+
 @app_flask.route("/webhook", methods=["POST"])
 def webhook():
     if request.headers.get("X-Telegram-Bot-Api-Secret-Token") != WEBHOOK_SECRET:
@@ -43,7 +47,9 @@ def webhook():
     application.update_queue.put_nowait(update)
     return "OK"
 
-async def start_bot():
+# --------------------- INICIALIZAÇÃO ASSÍNCRONA --------------------
+
+async def main():
     global application
     application = ApplicationBuilder().token(TOKEN).build()
 
@@ -57,15 +63,14 @@ async def start_bot():
 
     await application.initialize()
     await application.start()
-    print("✅ Bot Telegram pronto para receber Webhook!")
+    print("✅ Bot Telegram com webhook pronto!")
 
-# Executa o bot e o servidor Flask
-def run():
-    asyncio.run(start_bot())
-    app_flask.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
+# --------------------- START FLASK + BOT --------------------
 
 if __name__ == "__main__":
-    from threading import Thread
+    # Inicia o bot em background
+    loop = asyncio.get_event_loop()
+    loop.create_task(main())
 
-    # Inicia o bot em uma thread separada para não bloquear o Flask
-    Thread(target=run).start()
+    # Inicia o servidor Flask (Render detecta essa porta)
+    app_flask.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
