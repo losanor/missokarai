@@ -3,7 +3,7 @@ from telegram.ext import ContextTypes
 
 # Exemplo de categorias e receitas (depois também vai para banco)
 receitas = {
-    "entrada": [
+    "snacks": [
         {"nome": "Salada com Missô Karai"},
     ],
     "principal": [
@@ -13,8 +13,11 @@ receitas = {
 
 async def menu_receitas(update: Update, context: ContextTypes.DEFAULT_TYPE):
     botoes = [
-        [InlineKeyboardButton("Entradas", callback_data="categoria_entrada")],
-        [InlineKeyboardButton("Pratos Principais", callback_data="categoria_principal")]
+        [InlineKeyboardButton("Snacks", callback_data="categoria_snacks")],
+        [InlineKeyboardButton("Pratos Principais", callback_data="categoria_principal")],
+        [InlineKeyboardButton("Vegano", callback_data="categoria_vegano")],
+        [InlineKeyboardButton("Sobremesa", callback_data="categoria_sobremesa")],
+        [InlineKeyboardButton("Molhos", callback_data="categoria_molhos")],
     ]
     await update.callback_query.message.edit_text(
         "Escolha uma categoria:", reply_markup=InlineKeyboardMarkup(botoes)
