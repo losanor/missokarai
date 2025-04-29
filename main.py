@@ -38,7 +38,6 @@ async def router(update, context):
         await listar_receitas(update, context)
 
 # --------------------- FLASK WEBHOOK --------------------
-
 @app_flask.route("/webhook", methods=["POST"])
 def webhook():
     try:
@@ -47,7 +46,7 @@ def webhook():
             return "Unauthorized", 403
 
         data = request.get_json(force=True)
-        print(f"🔔 Webhook RECEBIDO: {data}")
+        print(f"🔔 Webhook RECEBIDO: {data}")  # <- importante log aqui!
 
         if application is None:
             print("⚠️ Application ainda não foi inicializada!")
@@ -60,7 +59,6 @@ def webhook():
     except Exception as e:
         print(f"❌ Erro no webhook: {e}")
         return "Internal Server Error", 500
-
 
 # --------------------- INICIALIZAÇÃO ASSÍNCRONA --------------------
 
