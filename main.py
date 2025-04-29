@@ -1,19 +1,17 @@
 import os
-import asyncio
 from dotenv import load_dotenv
 from telegram.ext import ApplicationBuilder, CallbackQueryHandler, MessageHandler, filters
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from flask import Flask, request
 from handlers_lojas import menu_lojas, listar_lojas
 from handlers_receitas import menu_receitas, listar_receitas
 
 load_dotenv()
+
+# Variáveis de ambiente
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET", "misso-karai-token")
 APP_URL = os.getenv("APP_URL")
-
-app_flask = Flask(__name__)
-application = None
+PORT = int(os.getenv("PORT", 10000))  # Para compatibilidade com Render/Fly.io
 
 # --------------------- HANDLERS TELEGRAM --------------------
 
@@ -24,7 +22,7 @@ async def menu_principal(update: Update, context):
     ]
     await update.message.reply_text("Escolha uma opção:", reply_markup=InlineKeyboardMarkup(botoes))
 
-async def router(update, context):
+async def router(update: Update, context):
     query = update.callback_query
     await query.answer()
     data = query.data
@@ -37,59 +35,21 @@ async def router(update, context):
     elif data.startswith("categoria_"):
         await listar_receitas(update, context)
 
-# --------------------- FLASK WEBHOOK --------------------
-import asyncio
+# --------------------- INICIALIZAÇÃO DO BOT --------------------
 
-@app_flask.route("/webhook", methods=["POST"])
-def webhook():
-    if request.headers.get("X-Telegram-Bot-Api-Secret-Token") != WEBHOOK_SECRET:
-        print("🔒 Token inválido no header!")
-        return "Unauthorized", 403
-
-    try:
-        data = request.get_json(force=True)
-        print(f"🔔 Webhook RECEBIDO: {data}")
-
-        if application is None:
-            print("⚠️ Application ainda não foi inicializada!")
-            return "Application not ready", 503
-
-        update = Update.de_json(data, application.bot)
-        asyncio.run(application.process_update(update))  # 👈 AQUI é o pulo do gato!
-
-        return "OK", 200
-
-    except Exception as e:
-        print(f"❌ Erro no webhook: {e}")
-        return "Internal Server Error", 500
-
-
-# --------------------- INICIALIZAÇÃO ASSÍNCRONA --------------------
-
-async def main():
-    global application
+def main():
     application = ApplicationBuilder().token(TOKEN).build()
 
-    application.add_handler(MessageHandler(filters.TEXT, menu_principal))
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, menu_principal))
     application.add_handler(CallbackQueryHandler(router))
 
-    await application.bot.set_webhook(
-        url=f"{APP_URL}/webhook",
-        secret_token=WEBHOOK_SECRET,
+    application.run_webhook(
+        listen="0.0.0.0",
+        port=PORT,
+        url_path="webhook",
+        webhook_url=f"{APP_URL}/webhook",
+        secret_token=WEBHOOK_SECRET
     )
-    print("📡 Webhook registrado com sucesso!")
-    await application.initialize()
-    await application.start()
-    print("✅ Bot Telegram com webhook pronto!")
-
-# --------------------- START FLASK + BOT --------------------
 
 if __name__ == "__main__":
-    # Inicia o bot em background
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-
-    loop.create_task(main())
-
-    # Inicia o servidor Flask (Render detecta essa porta)
-    app_flask.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
+    main()
