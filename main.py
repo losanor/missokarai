@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from telegram.ext import ApplicationBuilder, MessageHandler, CommandHandler, CallbackQueryHandler, filters
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from handlers_lojas import menu_lojas, listar_lojas
 from handlers_receitas import menu_receitas, listar_receitas
 
@@ -9,8 +10,8 @@ TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 
 async def menu_principal(update, context):
     botoes = [
-        [InlineKeyboardButton("📍 Localizar Lojas", callback_data="menu_lojas")],
-        [InlineKeyboardButton("🍳 Receitas", callback_data="menu_receitas")]
+        [InlineKeyboardButton("\ud83d\udccd Localizar Lojas", callback_data="menu_lojas")],
+        [InlineKeyboardButton("\ud83c\udf73 Receitas", callback_data="menu_receitas")]
     ]
     await update.message.reply_text("Escolha uma opção:", reply_markup=InlineKeyboardMarkup(botoes))
 
