@@ -38,27 +38,31 @@ async def router(update, context):
         await listar_receitas(update, context)
 
 # --------------------- FLASK WEBHOOK --------------------
+import asyncio
+
 @app_flask.route("/webhook", methods=["POST"])
 def webhook():
-    try:
-        if request.headers.get("X-Telegram-Bot-Api-Secret-Token") != WEBHOOK_SECRET:
-            print("🔒 Token inválido no header!")
-            return "Unauthorized", 403
+    if request.headers.get("X-Telegram-Bot-Api-Secret-Token") != WEBHOOK_SECRET:
+        print("🔒 Token inválido no header!")
+        return "Unauthorized", 403
 
+    try:
         data = request.get_json(force=True)
-        print(f"🔔 Webhook RECEBIDO: {data}")  # <- importante log aqui!
+        print(f"🔔 Webhook RECEBIDO: {data}")
 
         if application is None:
             print("⚠️ Application ainda não foi inicializada!")
             return "Application not ready", 503
 
         update = Update.de_json(data, application.bot)
-        application.update_queue.put_nowait(update)
+        asyncio.run(application.process_update(update))  # 👈 AQUI é o pulo do gato!
+
         return "OK", 200
 
     except Exception as e:
         print(f"❌ Erro no webhook: {e}")
         return "Internal Server Error", 500
+
 
 # --------------------- INICIALIZAÇÃO ASSÍNCRONA --------------------
 
@@ -82,7 +86,9 @@ async def main():
 
 if __name__ == "__main__":
     # Inicia o bot em background
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
     loop.create_task(main())
 
     # Inicia o servidor Flask (Render detecta essa porta)
