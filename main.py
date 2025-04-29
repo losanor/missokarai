@@ -2,8 +2,8 @@ import os
 from dotenv import load_dotenv
 from telegram.ext import ApplicationBuilder, CallbackQueryHandler, MessageHandler, filters
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from handlers_lojas import menu_lojas, listar_lojas
-from handlers_receitas import menu_receitas, listar_receitas
+from handlers.handlers_lojas import menu_lojas, listar_lojas
+from handlers.handlers_receitas import menu_receitas, listar_receitas
 
 load_dotenv()
 
@@ -11,7 +11,7 @@ load_dotenv()
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET", "misso-karai-token")
 APP_URL = os.getenv("APP_URL")
-PORT = int(os.getenv("PORT", 10000))  # Para compatibilidade com Render/Fly.io
+PORT = int(os.getenv("PORT", 10000))
 
 # --------------------- HANDLERS TELEGRAM --------------------
 
@@ -20,7 +20,8 @@ async def menu_principal(update: Update, context):
         [InlineKeyboardButton("📍 Localizar Lojas", callback_data="menu_lojas")],
         [InlineKeyboardButton("🍳 Receitas", callback_data="menu_receitas")]
     ]
-    await update.message.reply_text("Escolha uma opção:", reply_markup=InlineKeyboardMarkup(botoes))
+    if update.message:
+        await update.message.reply_text("Escolha uma opção:", reply_markup=InlineKeyboardMarkup(botoes))
 
 async def router(update: Update, context):
     query = update.callback_query
