@@ -1,6 +1,7 @@
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ContextTypes
 from db import buscar_lojas_por_regiao
+from utils import escape_markdown_v2
 
 async def menu_lojas(update: Update, context: ContextTypes.DEFAULT_TYPE):
     regioes = ["Sul", "Norte", "Leste", "Oeste", "Central", "Interior"]
@@ -17,9 +18,8 @@ async def listar_lojas(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text("Nenhuma loja encontrada nessa região.")
         return
 
-    resposta = f"📍 Lojas na região {regiao}:
-\n"
+    resposta = f"\ud83d\udccd *Lojas na região {escape_markdown_v2(regiao)}:*\n\n"
     for nome, endereco, instagram in lojas:
-        resposta += f"• *{nome}*\n{endereco}\n[Instagram]({instagram})\n\n"
+        resposta += f"• *{escape_markdown_v2(nome)}*\n{escape_markdown_v2(endereco)}\n[Instagram]({escape_markdown_v2(instagram)})\n\n"
 
-    await query.edit_message_text(resposta, parse_mode="Markdown", disable_web_page_preview=True)
+    await query.edit_message_text(resposta, parse_mode="MarkdownV2", disable_web_page_preview=True)
