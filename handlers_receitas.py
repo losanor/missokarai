@@ -36,6 +36,7 @@ async def listar_receitas(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton("🔄 Outras categorias", callback_data="menu_receitas")],
             [InlineKeyboardButton("🔙 Voltar ao Menu Principal", callback_data="voltar_menu")],
             [InlineKeyboardButton("✅ Finalizar", callback_data="finalizar")]
+        ]
         await update.callback_query.message.edit_text(texto)
     else:
         await update.callback_query.message.edit_text("Nenhuma receita cadastrada nesta categoria ainda.")
