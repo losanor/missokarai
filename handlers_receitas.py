@@ -1,21 +1,33 @@
-from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
-from db import buscar_receitas_por_categoria
+
+# Exemplo de categorias e receitas (depois também vai para banco)
+receitas = {
+    "entrada": [
+        {"nome": "Salada com Missô Karai"},
+    ],
+    "principal": [
+        {"nome": "Frango Grelhado com Missô Karai"},
+    ]
+}
 
 async def menu_receitas(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    categorias = ["Snacks", "Prato Principal", "Vegano", "Sobremesa", "Molhos"]
-    botoes = [[InlineKeyboardButton(c, callback_data=f"categoria_{c}")] for c in categorias]
-    await update.message.reply_text("Escolha uma categoria:", reply_markup=InlineKeyboardMarkup(botoes))
+    botoes = [
+        [InlineKeyboardButton("Entradas", callback_data="categoria_entrada")],
+        [InlineKeyboardButton("Pratos Principais", callback_data="categoria_principal")]
+    ]
+    await update.callback_query.message.edit_text(
+        "Escolha uma categoria:", reply_markup=InlineKeyboardMarkup(botoes)
+    )
 
 async def listar_receitas(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-    categoria = query.data.split("_")[1]
-    receitas = buscar_receitas_por_categoria(categoria)
-
-    if not receitas:
-        await query.edit_message_text("Nenhuma receita encontrada nessa categoria.")
-        return
-
-    botoes = [[InlineKeyboardButton(nome, url=imagem_url)] for nome, imagem_url in receitas]
-    await query.edit_message_text(f"\ud83c\udf73 Escolha uma receita de {categoria}:", reply_markup=InlineKeyboardMarkup(botoes))
+    data = update.callback_query.data
+    categoria = data.replace("categoria_", "")
+    
+    if categoria in receitas:
+        texto = f"🍽️ Receitas - {categoria.title()}:\n\n"
+        for receita in receitas[categoria]:
+            texto += f"• {receita['nome']}\n\n"
+        await update.callback_query.message.edit_text(texto)
+    else:
+        await update.callback_query.message.edit_text("Nenhuma receita cadastrada nesta categoria ainda.")
