@@ -7,14 +7,14 @@ from handlers_receitas import menu_receitas, listar_receitas
 
 #inicializar chaves
 load_dotenv()
-if not all([TOKEN, APP_URL]):
-    raise EnvironmentError("❌ Variáveis de ambiente obrigatórias ausentes: TELEGRAM_TOKEN ou APP_URL")
+
 # Variáveis de ambiente
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET", "misso-karai-token")
 APP_URL = os.getenv("APP_URL")
 PORT = int(os.getenv("PORT", 10000))
-
+if not all([TOKEN, APP_URL]):
+    raise EnvironmentError("❌ Variáveis de ambiente obrigatórias ausentes: TELEGRAM_TOKEN ou APP_URL")
 # --------------------- HANDLERS TELEGRAM --------------------
 
 async def menu_principal(update: Update, context: ContextTypes.DEFAULT_TYPE):
