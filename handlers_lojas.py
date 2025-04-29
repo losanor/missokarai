@@ -1,25 +1,34 @@
-from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
-from db import buscar_lojas_por_regiao
-from utils import escape_markdown_v2
+
+# Exemplo de dados de lojas (depois podemos migrar para banco Supabase)
+lojas = {
+    "zona_sul": [
+        {"nome": "Loja A", "endereco": "Rua A, 123", "instagram": "@lojazs"},
+        {"nome": "Loja B", "endereco": "Rua B, 456", "instagram": "@lojabzs"},
+    ],
+    "zona_norte": [
+        {"nome": "Loja C", "endereco": "Rua C, 789", "instagram": "@lojan"},
+    ]
+}
 
 async def menu_lojas(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    regioes = ["Sul", "Norte", "Leste", "Oeste", "Central", "Interior"]
-    botoes = [[InlineKeyboardButton(r, callback_data=f"regiao_{r}")] for r in regioes]
-    await update.message.reply_text("Escolha a região:", reply_markup=InlineKeyboardMarkup(botoes))
+    botoes = [
+        [InlineKeyboardButton("Zona Sul", callback_data="regiao_zona_sul")],
+        [InlineKeyboardButton("Zona Norte", callback_data="regiao_zona_norte")]
+    ]
+    await update.callback_query.message.edit_text(
+        "Escolha uma região:", reply_markup=InlineKeyboardMarkup(botoes)
+    )
 
 async def listar_lojas(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-    regiao = query.data.split("_")[1]
-    lojas = buscar_lojas_por_regiao(regiao)
-
-    if not lojas:
-        await query.edit_message_text("Nenhuma loja encontrada nessa região.")
-        return
-
-    resposta = f"\ud83d\udccd *Lojas na região {escape_markdown_v2(regiao)}:*\n\n"
-    for nome, endereco, instagram in lojas:
-        resposta += f"• *{escape_markdown_v2(nome)}*\n{escape_markdown_v2(endereco)}\n[Instagram]({escape_markdown_v2(instagram)})\n\n"
-
-    await query.edit_message_text(resposta, parse_mode="MarkdownV2", disable_web_page_preview=True)
+    data = update.callback_query.data
+    regiao = data.replace("regiao_", "")
+    
+    if regiao in lojas:
+        texto = f"🏬 Lojas na {regiao.replace('_', ' ').title()}:\n\n"
+        for loja in lojas[regiao]:
+            texto += f"• {loja['nome']}\n  📍 {loja['endereco']}\n  📸 Instagram: {loja['instagram']}\n\n"
+        await update.callback_query.message.edit_text(texto)
+    else:
+        await update.callback_query.message.edit_text("Nenhuma loja cadastrada nesta região ainda.")
