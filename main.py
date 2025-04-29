@@ -50,7 +50,6 @@ async def start_bot():
     application.add_handler(MessageHandler(filters.TEXT, menu_principal))
     application.add_handler(CallbackQueryHandler(router))
 
-    # Seta o webhook para o Telegram
     await application.bot.set_webhook(
         url=f"{APP_URL}/webhook",
         secret_token=WEBHOOK_SECRET,
@@ -60,8 +59,13 @@ async def start_bot():
     await application.start()
     print("✅ Bot Telegram pronto para receber Webhook!")
 
-# Rodar o Flask normalmente
-if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.create_task(start_bot())  # INICIA o bot sem travar
+# Executa o bot e o servidor Flask
+def run():
+    asyncio.run(start_bot())
     app_flask.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
+
+if __name__ == "__main__":
+    from threading import Thread
+
+    # Inicia o bot em uma thread separada para não bloquear o Flask
+    Thread(target=run).start()
