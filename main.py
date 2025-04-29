@@ -37,7 +37,16 @@ async def router(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await menu_receitas(update, context)
     elif data.startswith("categoria_"):
         await listar_receitas(update, context)
+    elif data == "voltar_menu":
+        await menu_principal(update, context)
+    elif data == "finalizar":
+        await finalizar_conversa(update, context)
 
+
+async def finalizar_conversa(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.callback_query.message.edit_text(
+        "✅ Obrigado por usar o nosso bot! Quando quiser, é só mandar uma mensagem. 🍜"
+    )
 # --------------------- INICIALIZAÇÃO DO BOT --------------------
 
 def main():
