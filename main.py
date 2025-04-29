@@ -1,12 +1,13 @@
 import os
 from dotenv import load_dotenv
-from telegram.ext import ApplicationBuilder, CallbackQueryHandler, MessageHandler, filters
+from telegram.ext import ApplicationBuilder, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from handlers.handlers_lojas import menu_lojas, listar_lojas
-from handlers.handlers_receitas import menu_receitas, listar_receitas
+from handlers_lojas import menu_lojas, listar_lojas
+from handlers_receitas import menu_receitas, listar_receitas
 
 load_dotenv()
-
+if not all([TOKEN, APP_URL]):
+    raise EnvironmentError("❌ Variáveis de ambiente obrigatórias ausentes: TELEGRAM_TOKEN ou APP_URL")
 # Variáveis de ambiente
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET", "misso-karai-token")
@@ -15,7 +16,7 @@ PORT = int(os.getenv("PORT", 10000))
 
 # --------------------- HANDLERS TELEGRAM --------------------
 
-async def menu_principal(update: Update, context):
+async def menu_principal(update: Update, context: ContextTypes.DEFAULT_TYPE):
     botoes = [
         [InlineKeyboardButton("📍 Localizar Lojas", callback_data="menu_lojas")],
         [InlineKeyboardButton("🍳 Receitas", callback_data="menu_receitas")]
@@ -23,7 +24,7 @@ async def menu_principal(update: Update, context):
     if update.message:
         await update.message.reply_text("Escolha uma opção:", reply_markup=InlineKeyboardMarkup(botoes))
 
-async def router(update: Update, context):
+async def router(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     data = query.data
