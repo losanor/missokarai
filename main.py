@@ -5,6 +5,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from handlers_lojas import menu_lojas, listar_lojas
 from handlers_receitas import menu_receitas, listar_receitas
 
+#inicializar chaves
 load_dotenv()
 if not all([TOKEN, APP_URL]):
     raise EnvironmentError("❌ Variáveis de ambiente obrigatórias ausentes: TELEGRAM_TOKEN ou APP_URL")
@@ -22,7 +23,7 @@ async def menu_principal(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("🍳 Receitas", callback_data="menu_receitas")]
     ]
     if update.message:
-        await update.message.reply_text("Escolha uma opção:", reply_markup=InlineKeyboardMarkup(botoes))
+        await update.message.reply_text("Olá eu sou a MK!Escolha uma opção:", reply_markup=InlineKeyboardMarkup(botoes))
 
 async def router(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
