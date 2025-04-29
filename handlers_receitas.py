@@ -18,6 +18,7 @@ async def menu_receitas(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("Vegano", callback_data="categoria_vegano")],
         [InlineKeyboardButton("Sobremesa", callback_data="categoria_sobremesa")],
         [InlineKeyboardButton("Molhos", callback_data="categoria_molhos")],
+        [InlineKeyboardButton("🔙 Voltar ao Menu Principal", callback_data="voltar_menu")]
     ]
     await update.callback_query.message.edit_text(
         "Escolha uma categoria:", reply_markup=InlineKeyboardMarkup(botoes)
@@ -31,6 +32,10 @@ async def listar_receitas(update: Update, context: ContextTypes.DEFAULT_TYPE):
         texto = f"🍽️ Receitas - {categoria.title()}:\n\n"
         for receita in receitas[categoria]:
             texto += f"• {receita['nome']}\n\n"
+        botoes = [
+            [InlineKeyboardButton("🔄 Outras categorias", callback_data="menu_receitas")],
+            [InlineKeyboardButton("🔙 Voltar ao Menu Principal", callback_data="voltar_menu")],
+            [InlineKeyboardButton("✅ Finalizar", callback_data="finalizar")]
         await update.callback_query.message.edit_text(texto)
     else:
         await update.callback_query.message.edit_text("Nenhuma receita cadastrada nesta categoria ainda.")
