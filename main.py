@@ -60,7 +60,7 @@ async def main():
         url=f"{APP_URL}/webhook",
         secret_token=WEBHOOK_SECRET,
     )
-
+    print("📡 Webhook registrado com sucesso!")
     await application.initialize()
     await application.start()
     print("✅ Bot Telegram com webhook pronto!")
