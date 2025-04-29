@@ -14,8 +14,12 @@ lojas = {
 
 async def menu_lojas(update: Update, context: ContextTypes.DEFAULT_TYPE):
     botoes = [
-        [InlineKeyboardButton("Zona Sul", callback_data="regiao_zona_sul")],
-        [InlineKeyboardButton("Zona Norte", callback_data="regiao_zona_norte")]
+        [InlineKeyboardButton("Sul", callback_data="regiao_zona_sul")],
+        [InlineKeyboardButton("Norte", callback_data="regiao_zona_norte")],
+        [InlineKeyboardButton("Leste", callback_data="regiao_zona_leste")],
+        [InlineKeyboardButton("Oeste", callback_data="regiao_zona_oeste")],
+        [InlineKeyboardButton("Central", callback_data="regiao_central")],
+        [InlineKeyboardButton("Interior", callback_data="Interior")]
     ]
     await update.callback_query.message.edit_text(
         "Escolha uma região:", reply_markup=InlineKeyboardMarkup(botoes)
