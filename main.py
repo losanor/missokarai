@@ -41,11 +41,26 @@ async def router(update, context):
 
 @app_flask.route("/webhook", methods=["POST"])
 def webhook():
-    if request.headers.get("X-Telegram-Bot-Api-Secret-Token") != WEBHOOK_SECRET:
-        return "Unauthorized", 403
-    update = Update.de_json(request.get_json(force=True), application.bot)
-    application.update_queue.put_nowait(update)
-    return "OK"
+    try:
+        if request.headers.get("X-Telegram-Bot-Api-Secret-Token") != WEBHOOK_SECRET:
+            print("🔒 Token inválido no header!")
+            return "Unauthorized", 403
+
+        data = request.get_json(force=True)
+        print(f"🔔 Webhook RECEBIDO: {data}")
+
+        if application is None:
+            print("⚠️ Application ainda não foi inicializada!")
+            return "Application not ready", 503
+
+        update = Update.de_json(data, application.bot)
+        application.update_queue.put_nowait(update)
+        return "OK", 200
+
+    except Exception as e:
+        print(f"❌ Erro no webhook: {e}")
+        return "Internal Server Error", 500
+
 
 # --------------------- INICIALIZAÇÃO ASSÍNCRONA --------------------
 
