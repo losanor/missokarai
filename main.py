@@ -22,8 +22,12 @@ async def menu_principal(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("📍 Localizar Lojas", callback_data="menu_lojas")],
         [InlineKeyboardButton("🍳 Receitas", callback_data="menu_receitas")]
     ]
+    texto = "👋 Olá! Eu sou a MK.\nEscolha uma opção:"
+    
     if update.message:
-        await update.message.reply_text("Olá eu sou a MK!Escolha uma opção:", reply_markup=InlineKeyboardMarkup(botoes))
+        await update.message.reply_text(texto, reply_markup=InlineKeyboardMarkup(botoes))
+    elif update.callback_query:
+        await update.callback_query.message.edit_text(texto, reply_markup=InlineKeyboardMarkup(botoes))
 
 async def router(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
