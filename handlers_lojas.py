@@ -1,16 +1,24 @@
 # handlers_lojas.py
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
+from supabase import create_client
+import os
 
-lojas = {
-    "zona_sul": [
-        {"nome": "Loja A", "endereco": "Rua A, 123", "instagram": "@lojazs"},
-        {"nome": "Loja B", "endereco": "Rua B, 456", "instagram": "@lojabzs"},
-    ],
-    "zona_norte": [
-        {"nome": "Loja C", "endereco": "Rua C, 789", "instagram": "@lojan"},
-    ]
-}
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
+if not SUPABASE_URL or not SUPABASE_KEY:
+    raise EnvironmentError("❌ Variáveis SUPABASE_URL ou SUPABASE_KEY não definidas.")
+
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+async def buscar_lojas_por_regiao(regiao: str):
+    try:
+        response = supabase.table("lojas").select("*").eq("regiao", regiao).execute()
+        return response.data
+    except Exception as e:
+        print(f"Erro ao buscar lojas do Supabase: {e}")
+        return []
 
 async def menu_lojas(update: Update, context: ContextTypes.DEFAULT_TYPE):
     botoes = [
@@ -31,9 +39,10 @@ async def listar_lojas(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = update.callback_query.data
     regiao = data.replace("regiao_", "")
 
-    if regiao in lojas:
-        texto = f"🏬 Lojas na {regiao.replace('_', ' ').title()}:\n\n"
-        for loja in lojas[regiao]:
+    lojas_da_regiao = await buscar_lojas_por_regiao(regiao)
+    if lojas_da_regiao:
+        texto = f"🏬 Lojas na região {regiao.title()}:\n\n"
+        for loja in lojas_da_regiao:
             texto += f"• {loja['nome']} - {loja['endereco']} ({loja['instagram']})\n"
         botoes = [
             [InlineKeyboardButton("🔄 Ver outras regiões", callback_data="menu_lojas")],
