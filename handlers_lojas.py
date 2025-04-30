@@ -1,6 +1,7 @@
 # handlers_lojas.py
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
+from telegram.error import BadRequest
 from supabase import create_client
 import os
 
@@ -41,15 +42,36 @@ async def listar_lojas(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     lojas_da_regiao = await buscar_lojas_por_regiao(regiao)
     if lojas_da_regiao:
-        texto = f"🏬 Lojas na região {regiao.title()}:\n\n"
+        texto = f"*🏬 Lojas na região {regiao.title()}*\n\n"
         for loja in lojas_da_regiao:
-            texto += f"• {loja['nome']} - {loja['endereco']} ({loja['instagram']})\n"
+            nome = loja["nome"]
+            endereco = loja["endereco"]
+            instagram = loja["instagram"].strip()
+
+            texto += f"🏪 *{nome}*\n📍 {endereco}\n"
+            if instagram:
+                username = instagram.replace("@", "")
+                texto += f"📸 [@{username}](https://instagram.com/{username})\n"
+            texto += "\n"
+
         botoes = [
             [InlineKeyboardButton("🔄 Ver outras regiões", callback_data="menu_lojas")],
             [InlineKeyboardButton("🔙 Menu Principal", callback_data="voltar_menu")],
             [InlineKeyboardButton("✅ Finalizar", callback_data="finalizar")]
         ]
-        await update.callback_query.message.edit_text(texto, reply_markup=InlineKeyboardMarkup(botoes))
-    else:
-        await update.callback_query.message.edit_text("Nenhuma loja cadastrada nesta região ainda.")
 
+        try:
+            await update.callback_query.message.edit_text(
+                texto,
+                reply_markup=InlineKeyboardMarkup(botoes),
+                parse_mode="Markdown"
+            )
+        except BadRequest as e:
+            if "Message is not modified" in str(e):
+                pass
+            else:
+                raise
+    else:
+        await update.callback_query.message.edit_text(
+            "Nenhuma loja cadastrada nesta região ainda."
+        )
