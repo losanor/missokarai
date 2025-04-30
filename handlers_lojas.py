@@ -72,6 +72,15 @@ async def listar_lojas(update: Update, context: ContextTypes.DEFAULT_TYPE):
             else:
                 raise
     else:
+        texto = "⚠️ Em breve teremos loja aqui."
+
+        botoes = [
+            [InlineKeyboardButton("🔄 Ver outras regiões", callback_data="menu_lojas")],
+            [InlineKeyboardButton("🔙 Menu Principal", callback_data="voltar_menu")],
+            [InlineKeyboardButton("✅ Finalizar", callback_data="finalizar")]
+        ]
+
         await update.callback_query.message.edit_text(
-            "Nenhuma loja cadastrada nesta região ainda."
+            texto,
+            reply_markup=InlineKeyboardMarkup(botoes)
         )
