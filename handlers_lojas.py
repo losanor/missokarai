@@ -35,10 +35,13 @@ async def listar_lojas(update: Update, context: ContextTypes.DEFAULT_TYPE):
         for loja in lojas[regiao]:
             texto += f"• {loja['nome']}\n  📍 {loja['endereco']}\n  📸 Instagram: {loja['instagram']}\n\n"
         botoes = [
-            [InlineKeyboardButton("🔄 Ver outras regiões", callback_data="menu_lojas")],
-            [InlineKeyboardButton("🔙 Voltar ao Menu Principal", callback_data="voltar_menu")],
+            [InlineKeyboardButton("🔄 Voltar para regiões", callback_data="menu_lojas")],
+            [InlineKeyboardButton("🔙 Menu Principal", callback_data="voltar_menu")],
             [InlineKeyboardButton("✅ Finalizar", callback_data="finalizar")]
         ]
-        await update.callback_query.message.edit_text(texto)
+        await update.callback_query.message.edit_text(
+            texto,
+            reply_markup=InlineKeyboardMarkup(botoes)
+        )
     else:
         await update.callback_query.message.edit_text("Nenhuma loja cadastrada nesta região ainda.")
